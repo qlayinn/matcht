@@ -4,8 +4,8 @@ using TMPro;
 
 public class MainMenu : MonoBehaviour
 {   
-    public GameObject highScorePanel; // Панель для отображения рекордов
-    public TMP_Text highScoreText; // Текст для отображения рекорда
+    public GameObject highScorePanel; 
+    public TMP_Text highScoreText; 
 
     private void Start()
     {
@@ -21,7 +21,7 @@ public class MainMenu : MonoBehaviour
 
     public void PlayGame()
     {
-        Debug.Log("Play button clicked"); // Отладочное сообщение
+        Debug.Log("Play button clicked"); 
         SceneManager.LoadScene("GameScene");
     }
 
@@ -54,7 +54,7 @@ public class MainMenu : MonoBehaviour
 
     public void ExitGame()
     {
-        Debug.Log("Exit button clicked"); // Отладочное сообщение
+        Debug.Log("Exit button clicked"); 
         SceneManager.LoadScene("ExitConfirmation");
     }
 }
