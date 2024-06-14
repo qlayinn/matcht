@@ -9,7 +9,6 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        // Убедитесь, что панель рекордов неактивна при старте
         if (highScorePanel != null)
         {
             highScorePanel.SetActive(false);
@@ -30,10 +29,8 @@ public class MainMenu : MonoBehaviour
     {
         if (highScorePanel != null && highScoreText != null)
         {
-            // Отобразите панель рекордов
             highScorePanel.SetActive(true);
 
-            // Обновите текст с рекордом
             int highScore = PlayerPrefs.GetInt("HighScore", 0);
             highScoreText.text = "High Score: " + highScore;
         }
@@ -47,7 +44,6 @@ public class MainMenu : MonoBehaviour
     {
         if (highScorePanel != null)
         {
-            // Скрыть панель рекордов
             highScorePanel.SetActive(false);
         }
         else
