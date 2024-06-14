@@ -17,7 +17,7 @@ public class GameBoard : MonoBehaviour
     public Button mainMenuButton;
 
     private int score = 0;
-    private float gameTime = 60f; // 60 секунд игрового времени
+    private float gameTime = 60f; 
     private GameObject[,] allPieces;
     private GamePiece selectedPiece;
     private bool isSwapping = false;
@@ -29,17 +29,15 @@ public class GameBoard : MonoBehaviour
         allPieces = new GameObject[width, height];
         SetupBoard();
         UpdateScore(0);
-        endGamePanel.SetActive(false); // Убедитесь, что панель неактивна при старте
+        endGamePanel.SetActive(false); 
         mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
         StartCoroutine(GameTimer());
 
-        // Загрузка high score
         highScore = PlayerPrefs.GetInt("HighScore", 0);
     }
 
     void Update()
     {
-        // Обновляем таймер каждый кадр
         if (gameTime > 0)
         {
             gameTime -= Time.deltaTime;
@@ -144,7 +142,6 @@ public class GameBoard : MonoBehaviour
         }
         else
         {
-            // Swap back if no match
             piece1.transform.position = pos1;
             piece2.transform.position = pos2;
 
@@ -180,7 +177,6 @@ public class GameBoard : MonoBehaviour
             {
                 if (allPieces[x, y] != null)
                 {
-                    // Проверка горизонтальных совпадений
                     if (x < width - 2 && allPieces[x, y].tag == allPieces[x + 1, y].tag && allPieces[x, y].tag == allPieces[x + 2, y].tag)
                     {
                         int matchLength = 3;
@@ -190,7 +186,6 @@ public class GameBoard : MonoBehaviour
                         }
                         DestroyMatchHorizontal(x, y, matchLength);
                     }
-                    // Проверка вертикальных совпадений
                     if (y < height - 2 && allPieces[x, y].tag == allPieces[x, y + 1].tag && allPieces[x, y].tag == allPieces[x, y + 2].tag)
                     {
                         int matchLength = 3;
