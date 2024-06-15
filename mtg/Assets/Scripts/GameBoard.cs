@@ -17,11 +17,9 @@ public class GameBoard : MonoBehaviour
     public Button mainMenuButton;
 
     private int score = 0;
-    private float gameTime = 60f; 
+    private float gameTime = 60f;
     private GameObject[,] allPieces;
     private GamePiece selectedPiece;
-    private bool isSwapping = false;
-
     private int highScore = 0;
 
     void Start()
@@ -29,8 +27,9 @@ public class GameBoard : MonoBehaviour
         allPieces = new GameObject[width, height];
         SetupBoard();
         UpdateScore(0);
-        endGamePanel.SetActive(false); 
+        endGamePanel.SetActive(false);
         mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
+        Time.timeScale = 1;
         StartCoroutine(GameTimer());
 
         highScore = PlayerPrefs.GetInt("HighScore", 0);
@@ -71,7 +70,7 @@ public class GameBoard : MonoBehaviour
         StartCoroutine(CheckAndResolveMatches());
     }
 
-    bool HasInitialMatch(int x, int y, GameObject piece)
+    private bool HasInitialMatch(int x, int y, GameObject piece)
     {
         if (x >= 2 && allPieces[x - 1, y] != null && allPieces[x - 2, y] != null)
         {
@@ -98,9 +97,9 @@ public class GameBoard : MonoBehaviour
         }
         else
         {
-            if (!isSwapping && IsAdjacent(selectedPiece, piece))
+            if (IsAdjacent(selectedPiece, piece))
             {
-                StartCoroutine(SwapPieces(selectedPiece, piece));
+                StartCoroutine(TrySwapPieces(selectedPiece, piece));
                 selectedPiece = null;
             }
             else
@@ -118,10 +117,8 @@ public class GameBoard : MonoBehaviour
         return (Mathf.Abs(pos1.x - pos2.x) + Mathf.Abs(pos1.y - pos2.y)) == 1;
     }
 
-    IEnumerator SwapPieces(GamePiece piece1, GamePiece piece2)
+    IEnumerator TrySwapPieces(GamePiece piece1, GamePiece piece2)
     {
-        isSwapping = true;
-
         Vector3 pos1 = piece1.transform.position;
         Vector3 pos2 = piece2.transform.position;
 
@@ -148,8 +145,6 @@ public class GameBoard : MonoBehaviour
             allPieces[posIndex1.x, posIndex1.y] = piece1.gameObject;
             allPieces[posIndex2.x, posIndex2.y] = piece2.gameObject;
         }
-
-        isSwapping = false;
     }
 
     IEnumerator CheckAndResolveMatches()
@@ -222,13 +217,13 @@ public class GameBoard : MonoBehaviour
         return false;
     }
 
-    void DestroyMatchHorizontal(int startX, int y, int length)
+    private void DestroyMatchHorizontal(int startX, int y, int length)
     {
         for (int x = startX; x < startX + length; x++)
         {
             if (allPieces[x, y] != null)
             {
-                allPieces[x, y].GetComponent<GamePiece>().DestroyPiece();
+                Destroy(allPieces[x, y]);
                 allPieces[x, y] = null;
             }
         }
@@ -236,13 +231,13 @@ public class GameBoard : MonoBehaviour
         UpdateScore(length);
     }
 
-    void DestroyMatchVertical(int x, int startY, int length)
+    private void DestroyMatchVertical(int x, int startY, int length)
     {
         for (int y = startY; y < startY + length; y++)
         {
             if (allPieces[x, y] != null)
             {
-                allPieces[x, y].GetComponent<GamePiece>().DestroyPiece();
+                Destroy(allPieces[x, y]);
                 allPieces[x, y] = null;
             }
         }
@@ -252,33 +247,33 @@ public class GameBoard : MonoBehaviour
 
     IEnumerator FillEmptySpaces()
     {
+        bool filledEmptySpaces = false;
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 if (allPieces[x, y] == null)
                 {
-                    for (int fillY = y; fillY < height - 1; fillY++)
-                    {
-                        allPieces[x, fillY] = allPieces[x, fillY + 1];
-                        allPieces[x, fillY + 1] = null;
-                        if (allPieces[x, fillY] != null)
-                        {
-                            allPieces[x, fillY].transform.position = new Vector2(x, fillY);
-                        }
-                    }
-                    allPieces[x, height - 1] = Instantiate(gamePieces[Random.Range(0, gamePieces.Length)], new Vector2(x, height - 1), Quaternion.identity);
-                    allPieces[x, height - 1].transform.SetParent(this.transform);
-                    allPieces[x, height - 1].transform.localScale = Vector3.one * 0.1f;
+                    Vector2 position = new Vector2(x, y);
+                    int pieceToUse = Random.Range(0, gamePieces.Length);
+                    GameObject newPiece = Instantiate(gamePieces[pieceToUse], position, Quaternion.identity);
+                    newPiece.transform.SetParent(this.transform);
+                    newPiece.transform.localScale = Vector3.one * 0.1f;
+                    allPieces[x, y] = newPiece;
+                    filledEmptySpaces = true;
                 }
             }
         }
 
-        yield return new WaitForSeconds(0.2f);
-        StartCoroutine(CheckAndResolveMatches());
+        if (filledEmptySpaces)
+        {
+            yield return new WaitForSeconds(0.2f);
+            StartCoroutine(CheckAndResolveMatches());
+        }
     }
 
-    void UpdateScore(int points)
+    private void UpdateScore(int points)
     {
         score += points;
         scoreText.text = "Score: " + score;
@@ -293,7 +288,7 @@ public class GameBoard : MonoBehaviour
         EndGame();
     }
 
-    void EndGame()
+    private void EndGame()
     {
         endGamePanel.SetActive(true);
         endGameScoreText.text = "Your Score: " + score;
@@ -319,3 +314,4 @@ public class GameBoard : MonoBehaviour
         return new Vector2Int(x, y);
     }
 }
+
